@@ -1,0 +1,50 @@
+﻿@model List<TreeViewInMVC.Models.TreeModel>
+@using System.Web.UI.WebControls
+@using TreeViewInMVC.Models
+<h2>TreeView</h2>
+<link href="~/Content/jstree/dist/themes/default/style.min.css" rel="stylesheet" />
+<div class="form-body">
+    <div id="jstree">
+        @(Html.TreeView(Model)
+                          .EmptyContent("root")
+                          .Children(m => m.Childs)
+                          .HtmlAttributes(new { id = "tree" })
+                      .ChildrenHtmlAttributes(new { @class = "subItem" })
+                          .ItemText(m => m.Title)
+                          .ItemTemplate(
+        @<text>
+            <a href="@item.Description" desc="@item.Description">@item.Title</a>
+        </text>)
+        )
+    </div>
+</div>
+@section scripts
+{
+    <script src="~/Content/jstree/dist/jstree.min.js"></script>
+    <script>
+        $(function () {
+            var selectedData;
+            $('#jstree').jstree({
+                "core": {
+                    "multiple": true,
+                    "check_callback": false,
+                    'themes': {
+                        "responsive": true,
+                        'variant': 'larg',
+                        'stripes': false,
+                        'dots': false
+                    }
+                },
+                "types": {
+                    "default": {
+                        "icon": "fa fa-folder icon-state-warning icon-lg"
+                    },
+                    "file": {
+                        "icon": "fa fa-file icon-state-warning icon-lg"
+                    }
+                },
+                "plugins": ["dnd", "state", "types", "sort", "checkbox"]
+            });
+        });
+     </script>
+}
