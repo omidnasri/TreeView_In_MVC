@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using TreeViewInMVC.Models;
 
@@ -32,6 +30,12 @@ namespace TreeViewInMVC.Controllers
         {
             var db = new ApplicationDbContext();
             return View(db.TreeModel.Where(x => !x.ParentId.HasValue).ToList());
+        }
+
+        [HttpPost]
+        public ActionResult TreeView(List<TreeModel> model)
+        {
+            return View(model);
         }
 
     }

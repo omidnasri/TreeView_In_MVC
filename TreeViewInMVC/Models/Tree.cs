@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI;
@@ -152,6 +153,9 @@ namespace TreeViewInMVC.Models
 
             var listItems = _items.ToList();
 
+            var div = new TagBuilder("div");
+            div.MergeAttribute("id", "jstree");
+
             var ul = new TagBuilder("ul");
             ul.MergeAttributes(_htmlAttributes);
             var li = new TagBuilder("li")
@@ -173,12 +177,41 @@ namespace TreeViewInMVC.Models
             }
             ul.InnerHtml += li.ToString();
 
-            return ul.ToString();
+            div.InnerHtml += ul.ToString();
+
+            var outerDiv = new TagBuilder("div");
+            outerDiv.InnerHtml += div.ToString();
+
+            var hiddenTreeData = new TagBuilder("input");
+            hiddenTreeData.MergeAttribute("id", "treeHidden");
+            hiddenTreeData.MergeAttribute("name", "treeHidden");
+            hiddenTreeData.MergeAttribute("type", "hidden");
+            hiddenTreeData.MergeAttribute("value", "");
+
+            outerDiv.InnerHtml += hiddenTreeData.ToString();
+
+            var hiddenTreeIdsSelecteds = new TagBuilder("input");
+            hiddenTreeIdsSelecteds.MergeAttribute("id", "treeHiddenSelected");
+            hiddenTreeIdsSelecteds.MergeAttribute("name", "treeHiddenSelected");
+            hiddenTreeIdsSelecteds.MergeAttribute("type", "hidden");
+            hiddenTreeIdsSelecteds.MergeAttribute("value", "");
+
+            outerDiv.InnerHtml += hiddenTreeIdsSelecteds.ToString();
+
+            return outerDiv.ToString();
         }
 
         private void AppendChildren(TagBuilder parentTag, T parentItem, Func<T, IEnumerable<T>> childrenProperty)
         {
-            var children = childrenProperty(parentItem).ToList();
+
+            var enumerableList = childrenProperty(parentItem);
+
+            if (enumerableList == null)
+            {
+                return;
+            }
+
+            var children = enumerableList.ToList();
             if (!children.Any())
             {
                 return;
@@ -215,12 +248,25 @@ namespace TreeViewInMVC.Models
             {
                 if (prop.Name.ToLower() == "id")
                     li.MergeAttribute("id", prop.GetValue(item, null).ToString());
+
+                if (prop.Name.ToLower() == "title")
+                    li.MergeAttribute("data-title", prop.GetValue(item, null).ToString());
+
+                if (prop.Name.ToLower() == "description")
+                    li.MergeAttribute("data-description", prop.GetValue(item, null) == null ? "" : prop.GetValue(item, null).ToString());
+
+                if (prop.Name.ToLower() == "parentid")
+                    li.MergeAttribute("data-parentId", prop.GetValue(item, null) == null ? "" : prop.GetValue(item, null).ToString());
+
                 //li.GenerateId(prop.GetValue(item, null).ToString());
                 //object propValue = prop.GetValue(myObject, null);
                 // Do something with propValue
                 if (prop.Name.ToLower() == "sortorder")
                     li.MergeAttribute("priority", prop.GetValue(item, null).ToString());
             }
+
+            li.MergeAttribute("treeJsElement", "treeJsElement");
+
             return li;
         }
     }
