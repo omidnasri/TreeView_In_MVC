@@ -4,19 +4,22 @@
 <h2>TreeView</h2>
 <link href="~/Content/jstree/dist/themes/default/style.min.css" rel="stylesheet" />
 <div class="form-body">
-    <div id="jstree">
+    <form method="post">
+        @*<div id="jstree">*@
         @(Html.TreeView(Model)
-                          .EmptyContent("root")
-                          .Children(m => m.Childs)
-                          .HtmlAttributes(new { id = "tree" })
-                      .ChildrenHtmlAttributes(new { @class = "subItem" })
-                          .ItemText(m => m.Title)
-                          .ItemTemplate(
-        @<text>
-            <a href="@item.Description" desc="@item.Description">@item.Title</a>
-        </text>)
+                                                                                                                          .EmptyContent("root")
+                                                                                                                          .Children(m => m.Childs)
+                                                                                                                          .HtmlAttributes(new { id = "tree" })
+                                                                                                                      .ChildrenHtmlAttributes(new { @class = "subItem" })
+                                                                                                                          .ItemText(m => m.Description)
+                                                                                                                          .ItemTemplate(
+                                                                                                        @<text>
+                                                                                                            <a href="@item.Description" desc="@item.Description">@item.Title</a>
+                                                                                                        </text>)
         )
-    </div>
+        @*</div>*@
+        <input type="submit" value="Submit" />
+    </form>
 </div>
 @section scripts
 {
@@ -43,8 +46,39 @@
                         "icon": "fa fa-file icon-state-warning icon-lg"
                     }
                 },
-                "plugins": ["dnd", "state", "types", "sort", "checkbox"]
+                "plugins": ["dnd", "state", "types", "sort", "checkbox"],
+
             });
+
+            $('#jstree').on('changed.jstree', function (e, data) {
+                var i, j, r = [], m = [];
+                for (i = 0, j = data.selected.length; i < j; i++) {
+                    r.push(data.instance.get_node(data.selected[i]).id);
+                }
+
+                $('#treeHiddenSelected').val(JSON.stringify(r));
+            });
+
         });
-     </script>
+
+        let list = $("li[treejselement='treeJsElement']").map(function () { return $(this).attr("id"); }).get();
+
+        var elem = {}, n = [];
+
+        if (list.length > 0) {
+
+            for (var i = 0; i < list.length; i++) {
+                elem = $("li#" + list[i] + "[treejselement='treeJsElement']");
+                n.push({
+                    Id: list[i],
+                    Title: elem.data("title"),
+                    Description: elem.data("description"),
+                    ParentId: elem.data("parentid")
+                });
+            }
+
+            $('#treeHidden').val(JSON.stringify(n));
+        }
+
+    </script>
 }

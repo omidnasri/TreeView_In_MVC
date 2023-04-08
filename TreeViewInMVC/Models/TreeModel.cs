@@ -9,6 +9,7 @@ namespace TreeViewInMVC.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public int? ParentId { get; set; }
+        public bool Selected { get; set; }
         [ForeignKey("ParentId")]
         public virtual TreeModel Parent { get; set; }
         public virtual ICollection<TreeModel> Childs { get; set; }
